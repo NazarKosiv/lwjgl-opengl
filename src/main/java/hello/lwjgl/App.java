@@ -12,11 +12,15 @@ import java.nio.*;
 
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL46.*;
 import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class App {
+    private static final int floatSizeBytes = 4;
+    private static final int intSizeBytes = 4;
+    private static final int longSizeBytes = 8;
+    private static final int doubleSizeBytes = 8;
     private long window;
 
     public void run() {
@@ -96,14 +100,28 @@ public class App {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
-
+        System.out.println("version is: " + glGetString(GL_VERSION));
         // Set the clear color
         glClearColor(0.2f, 0.8f, 0.5f, 0.0f);
+        Loader loader = new Loader();
+        Renderer renderer = new Renderer();
 
-        // Run the rendering loop until the user has attempted to close
-        // the window or has pressed the ESCAPE key.
+        float[] vertices = {
+                // Left bottom triangle
+                -0.5f, 0.5f, 0f,
+                -0.5f, -0.5f, 0f,
+                0.5f, -0.5f, 0f,
+                // Right top triangle
+                0.5f, -0.5f, 0f,
+                0.5f, 0.5f, 0f,
+                -0.5f, 0.5f, 0f
+        };
+
+        Model model = loader.loadToVAO(vertices);
+
         while ( !glfwWindowShouldClose(window) ) {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+            renderer.prepare();
+            renderer.render(model);
 
             glfwSwapBuffers(window); // swap the color buffers
 
@@ -111,6 +129,8 @@ public class App {
             // invoked during this call.
             glfwPollEvents();
         }
+
+        loader.cleanUp();
     }
 
     public static void main(String[] args) {

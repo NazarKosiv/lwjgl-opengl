@@ -7,3 +7,5 @@ build
 # Ignore editore directory
 
 .idea
+
+*.log
