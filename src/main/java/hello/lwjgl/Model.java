@@ -3,7 +3,6 @@ package hello.lwjgl;
 /**
  * Represents a loaded model. It contains the ID of the VAO that contains the
  * model's data, and holds the number of vertices in the model.
- *
  */
 public class Model {
 
@@ -17,7 +16,7 @@ public class Model {
 
     /**
      * @return The ID of the VAO which contains the data about all the geometry
-     *         of this model.
+     * of this model.
      */
     public int getVaoID() {
         return vaoID;

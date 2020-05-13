@@ -3,6 +3,7 @@
  */
 package hello.lwjgl;
 
+import hello.lwjgl.shaders.StaticShader;
 import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -17,10 +18,8 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class App {
-    private static final int floatSizeBytes = 4;
-    private static final int intSizeBytes = 4;
-    private static final int longSizeBytes = 8;
-    private static final int doubleSizeBytes = 8;
+    private static final String VERTEX_FILE_PATH = "src/main/java/hello/lwjgl/shaders/basic_vs.glsl";
+    private static final String FRAGMENT_FILE_PATH = "src/main/java/hello/lwjgl/shaders/basic_fs.glsl";
     private long window;
 
     public void run() {
@@ -44,7 +43,7 @@ public class App {
         GLFWErrorCallback.createPrint(System.err).set();
 
         // Initialize GLFW. Most GLFW functions will not work before doing this.
-        if ( !glfwInit() )
+        if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
 
         // Configure GLFW
@@ -54,17 +53,17 @@ public class App {
 
         // Create the window
         window = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
-        if ( window == NULL )
+        if (window == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
+            if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
         });
 
         // Get the thread stack and push a new frame
-        try ( MemoryStack stack = stackPush() ) {
+        try (MemoryStack stack = stackPush()) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
 
@@ -105,31 +104,34 @@ public class App {
         glClearColor(0.2f, 0.8f, 0.5f, 0.0f);
         Loader loader = new Loader();
         Renderer renderer = new Renderer();
+        StaticShader staticShader = new StaticShader(VERTEX_FILE_PATH, FRAGMENT_FILE_PATH);
 
         float[] vertices = {
-                // Left bottom triangle
                 -0.5f, 0.5f, 0f,
                 -0.5f, -0.5f, 0f,
                 0.5f, -0.5f, 0f,
-                // Right top triangle
-                0.5f, -0.5f, 0f,
-                0.5f, 0.5f, 0f,
-                -0.5f, 0.5f, 0f
+                0.5f, 0.5f, 0f
         };
 
-        Model model = loader.loadToVAO(vertices);
+        int[] indices = {
+                0, 3, 1,
+                3, 2, 1
+        };
 
-        while ( !glfwWindowShouldClose(window) ) {
+        Model model = loader.loadToVAO(vertices, indices);
+
+        while (!glfwWindowShouldClose(window)) {
             renderer.prepare();
+            staticShader.start();
             renderer.render(model);
-
+            staticShader.stop();
             glfwSwapBuffers(window); // swap the color buffers
 
             // Poll for window events. The key callback above will only be
             // invoked during this call.
             glfwPollEvents();
         }
-
+        staticShader.cleanUp();
         loader.cleanUp();
     }
 

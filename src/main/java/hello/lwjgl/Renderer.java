@@ -17,24 +17,23 @@ public class Renderer {
 
     /**
      * Renders a model to the screen.
-     *
+     * <p>
      * Before we can render a VAO it needs to be made active, and we can do this
      * by binding it. We also need to enable the relevant attributes of the VAO,
      * which in this case is just attribute 0 where we stored the position data.
-     *
+     * <p>
      * The VAO can then be rendered to the screen using glDrawArrays(). We tell
      * it what type of shapes to render and the number of vertices that it needs
      * to render.
-     *
+     * <p>
      * After rendering we unbind the VAO and disable the attribute.
      *
-     * @param model
-     *            - The model to be rendered.
+     * @param model - The model to be rendered.
      */
     public void render(Model model) {
         glBindVertexArray(model.getVaoID());
         glEnableVertexAttribArray(0);
-        glDrawArrays(GL_TRIANGLES, 0, model.getVertexCount());
+        glDrawElements(GL_TRIANGLES, model.getVertexCount(), GL_UNSIGNED_INT, 0);
         glDisableVertexAttribArray(0);
         glBindVertexArray(0);
     }
