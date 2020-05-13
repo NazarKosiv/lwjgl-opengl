@@ -3,6 +3,7 @@ package hello.lwjgl;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,11 +24,20 @@ public class Loader {
         glBindVertexArray(0);
     }
 
-    public Model loadToVAO(float[] positions) {
+    private void bindIndicesBuffer(int[] indices) {
+        int vboID = glGenBuffers();
+        vbos.add(vboID);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboID);
+        IntBuffer buffer = storeDataInIntBuffer(indices);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, buffer, GL_STATIC_DRAW);
+    }
+
+    public Model loadToVAO(float[] positions, int[] indices) {
         int vaoID = createVAO();
+        bindIndicesBuffer(indices);
         storeDataInAttributeList(0, positions);
         unbindVAO();
-        return new Model(vaoID, positions.length / 3);
+        return new Model(vaoID, indices.length);
     }
 
     private void storeDataInAttributeList(int attributeNumber, float[] data) {
@@ -41,6 +51,13 @@ public class Loader {
 
     private FloatBuffer storeDataInFloatBuffer(float[] data) {
         FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
+        buffer.put(data);
+        buffer.flip();
+        return buffer;
+    }
+
+    private IntBuffer storeDataInIntBuffer(int[] data) {
+        IntBuffer buffer = BufferUtils.createIntBuffer(data.length);
         buffer.put(data);
         buffer.flip();
         return buffer;
